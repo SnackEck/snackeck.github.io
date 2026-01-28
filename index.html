@@ -1,40 +1,51 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Formular mit zwei Feldern</title>
-  <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 2rem; }
-    form { max-width: 480px; display: grid; gap: 0.75rem; }
-    label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
-    input[type="text"], input[type="email"] {
-      width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;
-      box-sizing: border-box;
-    }
-    button {
-      padding: 0.6rem 0.9rem; border: none; background: #0366d6; color: #ffffff;
-      border-radius: 6px; cursor: pointer;
-    }
-    .hint { font-size: 0.9rem; color: #555; margin-top: 0.5rem; }
-  </style>
+  <meta charset="UTF-8">
+  <title>NFC Formular</title>
 </head>
 <body>
-  <h1>Beispielformular</h1>
 
-  <form action="#" method="post" novalidate>
-    <div>
-      <label for="name">Name</label>
-      <input id="name" name="name" type="text" placeholder="Dein Name" required>
-    </div>
+<h2>NFC-Formular</h2>
 
-    <div>
-      <label for="email">E‑Mail</label>
-      <input id="email" name="email" type="email" placeholder="name@beispiel.de" required>
-    </div>
+<button id="scan">NFC scannen</button>
 
-    <button type="submit">Absenden</button>
-    <p class="hint">Beide Felder sind Pflichtfelder.</p>
-  </form>
+<form>
+  <label>NFC-Inhalt:</label><br>
+  <input type="text" id="nfcData" name="nfcData" readonly><br><br>
+
+  <label>Name:</label><br>
+  <input type="text" name="name"><br><br>
+
+  <button type="submit">Absenden</button>
+</form>
+
+<script>
+  const scanButton = document.getElementById("scan");
+  const nfcInput = document.getElementById("nfcData");
+
+  scanButton.addEventListener("click", async () => {
+    if (!("NDEFReader" in window)) {
+      alert("Web NFC wird nicht unterstützt");
+      return;
+    }
+
+    try {
+      const reader = new NDEFReader();
+      await reader.scan();
+      alert("NFC-Tag an das Handy halten");
+
+      reader.onreading = event => {
+        const record = event.message.records[0];
+        const textDecoder = new TextDecoder();
+        nfcInput.value = textDecoder.decode(record.data);
+      };
+    } catch (err) {
+      alert("Fehler: " + err);
+    }
+  });
+</script>
+  
 </body>
 </html>
